@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssignmentScheduler", "AssignmentScheduler\AssignmentScheduler.csproj", "{151437F6-B3CC-4DF4-9AA8-20F2278FC797}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{151437F6-B3CC-4DF4-9AA8-20F2278FC797}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{151437F6-B3CC-4DF4-9AA8-20F2278FC797}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{151437F6-B3CC-4DF4-9AA8-20F2278FC797}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{151437F6-B3CC-4DF4-9AA8-20F2278FC797}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AFC8E951-3FBF-4060-88F9-D55CD9AF8D99}
+	EndGlobalSection
+EndGlobal
