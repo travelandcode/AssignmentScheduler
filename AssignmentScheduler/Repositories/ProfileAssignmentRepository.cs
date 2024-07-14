@@ -33,5 +33,10 @@ namespace AssignmentScheduler.Repositories
 
             return assignments.Select(assignment => assignment.Name).ToList();
         }
+
+        public async Task<List<ProfileAssignment>> GetProfileAssignments()
+        {
+            return await _profileAssignmentCollection.Find(_ => true).ToListAsync(); // Retrieves all profile assignments
+        }
     }
 }
