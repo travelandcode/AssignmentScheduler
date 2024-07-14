@@ -10,5 +10,7 @@ namespace AssignmentScheduler.Interfaces
     public interface IProfileAssignmentRepository
     {
         Task<List<string>> GetUserAssignments(string profileName);
+
+        Task<List<ProfileAssignment>> GetProfileAssignments();
     }
 }
