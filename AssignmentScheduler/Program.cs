@@ -3,6 +3,7 @@ using log4net.Repository;
 using log4net;
 using AssignmentScheduler.Interfaces;
 using AssignmentScheduler.Repositories;
+using AssignmentScheduler.Services;
 
 namespace AssignmentScheduler
 {
@@ -35,6 +36,11 @@ namespace AssignmentScheduler
                     services.AddTransient<IProfileRepository, ProfileRepository>();
                     services.AddTransient<IProfileAssignmentRepository, ProfileAssignmentRepository>();
                     #endregion
+
+                    #region Services
+                    services.AddTransient<IAssignmentExcelGenerator, AssignmentExcelGenerator>();
+                    #endregion
+
                     services.AddHostedService<Worker>();
                 });
 
