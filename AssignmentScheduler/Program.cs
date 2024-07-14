@@ -1,8 +1,8 @@
-using AssignmentScheduler;
 using log4net.Config;
 using log4net.Repository;
 using log4net;
-using System.ComponentModel;
+using AssignmentScheduler.Interfaces;
+using AssignmentScheduler.Repositories;
 
 namespace AssignmentScheduler
 {
@@ -15,7 +15,6 @@ namespace AssignmentScheduler
             // Configure log4net
             var configuration = host.Services.GetRequiredService<IConfiguration>();
             ConfigureLog4Net(configuration);
-            s
 
             host.Run();
         }
@@ -28,8 +27,14 @@ namespace AssignmentScheduler
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                   
-                    services.AddSingleton<s>
+
+                    #region Repositories
+                    services.AddTransient<IAssignmentRepository, AssignmentRepository>();
+                    services.AddTransient<IMenRepository,MenRepository>();
+                    services.AddTransient<IMonthRepository, MonthRepository>();
+                    services.AddTransient<IProfileRepository, ProfileRepository>();
+                    services.AddTransient<IProfileAssignmentRepository, ProfileAssignmentRepository>();
+                    #endregion
                     services.AddHostedService<Worker>();
                 });
 
