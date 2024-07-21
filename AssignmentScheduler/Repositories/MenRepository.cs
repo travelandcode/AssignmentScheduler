@@ -14,7 +14,7 @@ namespace AssignmentScheduler.Repositories
 
         public async Task<List<Men>> GetAllMen()
         {
-            var men = await _menCollection.Find(FilterDefinition<Men>.Empty).SortBy(m => m.FullName).ToListAsync();
+            var men = await _menCollection.Find(_ => true).SortBy(m => m.fullname).ToListAsync();
             return men;
         }
     }

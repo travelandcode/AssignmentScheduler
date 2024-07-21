@@ -27,11 +27,11 @@ namespace AssignmentScheduler.Repositories
             Profile profile = await _profileCollection.Find(p => p.Name == profileName).FirstOrDefaultAsync();
             if (profile == null) { return null; }
 
-            var profileAssignments = await _profileAssignmentCollection.Find(pa => pa.ProfileId == profile.Id).ToListAsync();
-            var assignmentIds = profileAssignments.Select(pa => pa.AssignmentId).ToList();
+            var profileAssignments = await _profileAssignmentCollection.Find(pa => pa.profileid == profile.Id).ToListAsync();
+            var assignmentIds = profileAssignments.Select(pa => pa.assignmentid).ToList();
             var assignments = await _assignmentCollection.Find(a => assignmentIds.Contains(a.Id)).ToListAsync();
 
-            return assignments.Select(assignment => assignment.Name).ToList();
+            return assignments.Select(assignment => assignment.name).ToList();
         }
 
         public async Task<List<ProfileAssignment>> GetProfileAssignments()

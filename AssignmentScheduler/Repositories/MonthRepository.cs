@@ -18,8 +18,8 @@ namespace AssignmentScheduler.Repositories
             DateTime currentDate = DateTime.Now;
             DateTime nextMonth = currentDate.AddMonths(1);
             String month = nextMonth.ToString("MMMM");
-            var monthFromDB = await _monthCollection.Find(m => m.English == month).ToListAsync();
-            var monthInPatwa = monthFromDB.Select(m => m.Patwa).FirstOrDefault();
+            var monthFromDB = await _monthCollection.Find(m => m.english == month).ToListAsync();
+            var monthInPatwa = monthFromDB.Select(m => m.patwa).FirstOrDefault();
 
             return monthInPatwa;
         }
