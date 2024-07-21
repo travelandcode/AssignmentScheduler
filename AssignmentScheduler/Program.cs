@@ -4,6 +4,9 @@ using log4net;
 using AssignmentScheduler.Interfaces;
 using AssignmentScheduler.Repositories;
 using AssignmentScheduler.Services;
+using Microsoft.Extensions.Options;
+using AssignmentScheduler.Configuration;
+using MongoDB.Driver;
 
 namespace AssignmentScheduler
 {
@@ -21,28 +24,49 @@ namespace AssignmentScheduler
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((hostingContext, config) =>
-                {
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                })
-                .ConfigureServices((hostContext, services) =>
-                {
+       Host.CreateDefaultBuilder(args)
+           .ConfigureAppConfiguration((hostingContext, config) =>
+           {
+               config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+           })
+           .ConfigureServices((hostContext, services) =>
+           {
+               // Register MongoDB settings
+               services.Configure<MongoSettings>(
+                   hostContext.Configuration.GetSection(nameof(MongoSettings)));
 
-                    #region Repositories
-                    services.AddTransient<IAssignmentRepository, AssignmentRepository>();
-                    services.AddTransient<IMenRepository,MenRepository>();
-                    services.AddTransient<IMonthRepository, MonthRepository>();
-                    services.AddTransient<IProfileRepository, ProfileRepository>();
-                    services.AddTransient<IProfileAssignmentRepository, ProfileAssignmentRepository>();
-                    #endregion
+               services.AddSingleton<MongoSettings>(sp =>
+                   sp.GetRequiredService<IOptions<MongoSettings>>().Value);
 
-                    #region Services
-                    services.AddTransient<IAssignmentExcelGenerator, AssignmentExcelGenerator>();
-                    #endregion
+               // Create and register IMongoClient and IMongoDatabase
+               services.AddSingleton<IMongoClient, MongoClient>(sp =>
+               {
+                   var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+                   return new MongoClient(settings.ConnectionString);
+               });
 
-                    services.AddHostedService<Worker>();
-                });
+               services.AddScoped(sp =>
+               {
+                   var client = sp.GetRequiredService<IMongoClient>();
+                   var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+                   return client.GetDatabase(settings.DatabaseName);
+               });
+
+               #region Repositories
+               services.AddTransient<IAssignmentRepository, AssignmentRepository>();
+               services.AddTransient<IMenRepository, MenRepository>();
+               services.AddTransient<IMonthRepository, MonthRepository>();
+               services.AddTransient<IProfileRepository, ProfileRepository>();
+               services.AddTransient<IProfileAssignmentRepository, ProfileAssignmentRepository>();
+               #endregion
+
+               #region Services
+               services.AddTransient<IAssignmentExcelGenerator, AssignmentExcelGenerator>();
+               services.AddTransient<IEmailService, EmailService>();
+               #endregion
+
+               services.AddHostedService<Worker>();
+           });
 
 
         private static void ConfigureLog4Net(IConfiguration configuration)

@@ -20,7 +20,7 @@ namespace AssignmentScheduler.Repositories
 
         public async Task<List<Assignment>> GetAllAssignments()
         {
-            var assignments = await _assignmentCollection.Find(FilterDefinition<Assignment>.Empty).ToListAsync();
+            var assignments = await _assignmentCollection.Find(_ => true).ToListAsync();
             return assignments;
         }
     }

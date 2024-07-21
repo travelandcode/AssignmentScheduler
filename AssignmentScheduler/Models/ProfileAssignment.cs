@@ -12,7 +12,7 @@ namespace AssignmentScheduler.Models
     {
         [BsonId]
         public ObjectId Id { get; set; }
-        public ObjectId ProfileId { get; set; }
-        public ObjectId AssignmentId { get; set; }
+        public ObjectId profileid { get; set; }
+        public ObjectId assignmentid { get; set; }
     }
 }

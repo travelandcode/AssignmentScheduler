@@ -12,8 +12,8 @@ namespace AssignmentScheduler.Models
     {
         [BsonId]
         public ObjectId Id { get; set; }
-        public string FullName { get; set; }
+        public string fullname { get; set; }
 
-        public ObjectId ProfileId {  get; set; }
+        public ObjectId profileid {  get; set; }
     }
 }

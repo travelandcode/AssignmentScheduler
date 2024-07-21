@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AssignmentScheduler.Models;
 
 namespace AssignmentScheduler.Interfaces
 {
-    public interface IMenRepository
+    public interface IEmailService
     {
-        Task<List<Men>> GetAllMen();
+        Task SendEmail(string[] emails, string subject, List<byte[]> attachments);
     }
 }

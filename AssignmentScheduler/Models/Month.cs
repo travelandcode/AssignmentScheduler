@@ -12,7 +12,7 @@ namespace AssignmentScheduler.Models
     {
         [BsonId]
         public ObjectId Id { get; set; }
-        public string English {  get; set; }
-        public string Patwa {  get; set; }
+        public string english {  get; set; }
+        public string patwa {  get; set; }
     }
 }
