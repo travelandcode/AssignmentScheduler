@@ -29,7 +29,7 @@ namespace AssignmentScheduler
 
         private async void SendAssignmentSchedule()
         {
-            if (DateTime.Now.Day == 2)
+            if (DateTime.Now.Day == 20)
             {
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
