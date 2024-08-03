@@ -11,10 +11,6 @@ namespace AssignmentScheduler.Interfaces
 {
     public interface IAssignmentExcelGenerator
     {
-        Task<byte[]> GenerateAssignmentSchedule();
-
-        //void AssignTasks(IXLWorksheet worksheet, int row, Queue<Men> assignmentQueue, List<ProfileAssignment> profileAssignments, List<Assignment> assignments, int startColumn, int endColumn);
-
-        //bool RequiresTwoMen(string assignmentName);
+        Task<byte[]> GenerateAssignmentSchedule(string lastAssignedMan);
     }
 }

@@ -21,7 +21,7 @@ namespace AssignmentScheduler.Services
             _monthRepository = monthRepository;
         }
 
-        public async Task<byte[]> GenerateAssignmentSchedule()
+        public async Task<byte[]> GenerateAssignmentSchedule(string lastAssignedName)
         {
             var assignments = await _assignmentRepository.GetAllAssignments();
             var month = await _monthRepository.GetNextMonth();
@@ -61,7 +61,27 @@ namespace AssignmentScheduler.Services
                 
 
                 var profileAssignments = await _profileAssignmentRepository.GetProfileAssignments();
-                var assignmentQueue = new Queue<Men>(await _menRepository.GetAllMen());
+
+                // Find the last assigned name in the queue
+                var menList = await _menRepository.GetAllMen();
+
+                // Shuffle the list of men
+                var rng = new Random();
+                menList = menList.OrderBy(m => rng.Next()).ToList();
+
+                // Find the last assigned name in the shuffled list
+                var lastAssignedIndex = menList.FindIndex(m => m.fullname == lastAssignedName);
+
+                // Reorder the list to start after the last assigned name
+                if (lastAssignedIndex != -1)
+                {
+                    menList = menList.Skip(lastAssignedIndex + 5).Concat(menList.Take(lastAssignedIndex + 5)).ToList();
+                }
+
+                var assignmentQueue = new Queue<Men>(menList);
+
+                // Track which men have been assigned to special tasks
+                var manSpecialAssignments = new Dictionary<string, HashSet<string>>();
 
                 for (int day = 1; day <= DateTime.DaysInMonth(firstDayOfNextMonth.Year, firstDayOfNextMonth.Month); day++)
                 {
@@ -98,12 +118,12 @@ namespace AssignmentScheduler.Services
 
 
                             // Assign the rest of the tasks
-                            AssignTasks(worksheet, row, assignmentQueue, profileAssignments, assignments, startColumn: 4, endColumn: assignments.Count + 1);
+                            AssignTasks(worksheet, row, assignmentQueue, profileAssignments, assignments, startColumn: 4, endColumn: assignments.Count + 1, manSpecialAssignments);
                         }
                         else if (currentDate.DayOfWeek == DayOfWeek.Sunday)
                         {
                             // Assign tasks for Sunday
-                            AssignTasks(worksheet, row, assignmentQueue, profileAssignments, assignments, startColumn: 2, endColumn: assignments.Count + 1);
+                            AssignTasks(worksheet, row, assignmentQueue, profileAssignments, assignments, startColumn: 2, endColumn: assignments.Count + 1, manSpecialAssignments);
                         }
 
                         row += 2; // Move to the next pair of rows for the next day
@@ -163,7 +183,7 @@ namespace AssignmentScheduler.Services
             }
         }
 
-        private void AssignTasks(IXLWorksheet worksheet, int row, Queue<Men> assignmentQueue, List<ProfileAssignment> profileAssignments, List<Assignment> assignments, int startColumn, int endColumn)
+        private void AssignTasks(IXLWorksheet worksheet, int row, Queue<Men> assignmentQueue, List<ProfileAssignment> profileAssignments, List<Assignment> assignments, int startColumn, int endColumn, Dictionary<string, HashSet<string>> manSpecialAssignments)
         {
             for (int col = startColumn; col <= endColumn; col++)
             {
@@ -173,10 +193,28 @@ namespace AssignmentScheduler.Services
                 while (assignmentQueue.Count > 0)
                 {
                     var man = assignmentQueue.Dequeue();
+
+                    // Check if the task is special and if the man has been assigned to it
+                    if (RequiresSpecialAssignment(assignment.name) && manSpecialAssignments.TryGetValue(man.fullname, out var assignedTasks) && assignedTasks.Contains(assignment.name))
+                    {
+                        assignmentQueue.Enqueue(man); // Re-add the man to the queue if already assigned to this task
+                        continue;
+                    }
+
                     if (profileIds.Contains(man.profileid))
                     {
                         worksheet.Cell(row, col).Value = man.fullname;
                         assignmentQueue.Enqueue(man); // Re-add the man to the queue
+
+                        // Add to the man's special assignments
+                        if (RequiresSpecialAssignment(assignment.name))
+                        {
+                            if (!manSpecialAssignments.ContainsKey(man.fullname))
+                            {
+                                manSpecialAssignments[man.fullname] = new HashSet<string>();
+                            }
+                            manSpecialAssignments[man.fullname].Add(assignment.name);
+                        }
                         break;
                     }
                     assignmentQueue.Enqueue(man); // Re-add if not assigned
@@ -188,16 +226,35 @@ namespace AssignmentScheduler.Services
                     while (assignmentQueue.Count > 0)
                     {
                         var secondMan = assignmentQueue.Dequeue();
+
+                        // Check if the task is special and if the man has been assigned to it
+                        if (RequiresSpecialAssignment(assignment.name) && manSpecialAssignments.TryGetValue(secondMan.fullname, out var assignedTasks) && assignedTasks.Contains(assignment.name))
+                        {
+                            assignmentQueue.Enqueue(secondMan); // Re-add the man to the queue if already assigned to this task
+                            continue;
+                        }
+
                         if (profileIds.Contains(secondMan.profileid))
                         {
                             worksheet.Cell(row + 1, col).Value = secondMan.fullname; // Assign the second man below
                             worksheet.Cell(row + 1, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                             worksheet.Cell(row + 1, col).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                             assignmentQueue.Enqueue(secondMan); // Re-add the second man to the queue
+
+                            // Add to the man's special assignments
+                            if (RequiresSpecialAssignment(assignment.name))
+                            {
+                                if (!manSpecialAssignments.ContainsKey(secondMan.fullname))
+                                {
+                                    manSpecialAssignments[secondMan.fullname] = new HashSet<string>();
+                                }
+                                manSpecialAssignments[secondMan.fullname].Add(assignment.name);
+                            }
                             break;
                         }
                         assignmentQueue.Enqueue(secondMan); // Re-add if not assigned
                     }
+
                     // Merge the cells vertically after assigning the second man
                     worksheet.Cell(row, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     worksheet.Cell(row, col).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
@@ -205,15 +262,10 @@ namespace AssignmentScheduler.Services
                     // Apply a single border around the merged cells
                     worksheet.Range(row, col, row + 1, col).Style.Border.OutsideBorder = XLBorderStyleValues.Thick; // Use Thick for bold border
                     worksheet.Range(row, col, row + 1, col).Style.Border.OutsideBorderColor = XLColor.Black;
-
                 }
-                else 
+                else
                 {
-                    //worksheet.Range(row, col, row + 1, col).Merge();
-                    //worksheet.Cell(row, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    //worksheet.Cell(row, col).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
-                    // This else block handles assignments that don't require two men
+                    // Merge the cells if only one man is required
                     worksheet.Range(row, col, row + 1, col).Merge();
                     worksheet.Cell(row, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     worksheet.Cell(row, col).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
@@ -225,6 +277,10 @@ namespace AssignmentScheduler.Services
             }
         }
 
+        private bool RequiresSpecialAssignment(string assignmentName)
+        {
+            return new HashSet<string> { "Chierman", "Wachtowa Riida" }.Contains(assignmentName);
+        }
 
         private bool RequiresTwoMen(string assignmentName)
         {
