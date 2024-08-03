@@ -35,7 +35,7 @@ namespace AssignmentScheduler
                services.Configure<MongoSettings>(
                    hostContext.Configuration.GetSection(nameof(MongoSettings)));
 
-               services.AddSingleton<MongoSettings>(sp =>
+               services.AddTransient<MongoSettings>(sp =>
                    sp.GetRequiredService<IOptions<MongoSettings>>().Value);
 
                // Create and register IMongoClient and IMongoDatabase
@@ -63,6 +63,16 @@ namespace AssignmentScheduler
                #region Services
                services.AddTransient<IAssignmentExcelGenerator, AssignmentExcelGenerator>();
                services.AddTransient<IEmailService, EmailService>();
+               services.AddSingleton<IAwsS3>(provider =>
+               {
+                   var configuration = provider.GetRequiredService<IConfiguration>();
+                   var bucketName = configuration["AWS:BucketName"];
+                   var accessKey = configuration["AWS:AccessKey"];
+                   var secretKey = configuration["AWS:SecretKey"];
+                   var region = configuration["AWS:Region"];
+
+                   return new AwsS3Service(bucketName, accessKey, secretKey, region);
+               });
                #endregion
 
                services.AddHostedService<Worker>();
