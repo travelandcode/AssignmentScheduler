@@ -8,6 +8,6 @@ namespace AssignmentScheduler.Interfaces
 {
     public interface IEmailService
     {
-        Task SendEmail(string[] emails, string subject, List<byte[]> attachments);
+        Task SendEmail(string[] emails, string subject, List<byte[]> attachments, string month);
     }
 }

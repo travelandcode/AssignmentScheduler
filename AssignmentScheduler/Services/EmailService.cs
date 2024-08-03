@@ -17,34 +17,15 @@ namespace AssignmentScheduler.Services
         {
         }
 
-        //public async Task SendEmail(string email, string subject, List<byte[]> attachment)
-        //{
-        //    var message = new MailMessage
-        //    {
-        //        From = new MailAddress("ryonwalkerjnr2001@gmail.com", "Ryon Walker Jnr"),
-        //        IsBodyHtml = true,
-        //        Subject = subject,
-        //        Body = "Please see attached."
-        //    };
-
-
-
-
-        //    using (var smtp = new SmtpClient())
-        //    {
-
-        //        await smtp.SendMailAsync(message);
-        //    }
-        //}
-
-        public async Task SendEmail(string[] emails, string subject, List<byte[]> attachments)
+        public async Task SendEmail(string[] emails, string subject, List<byte[]> attachments, string month)
         {
             var message = new MailMessage
             {
-                From = new MailAddress("myonwalkerjnr200@gmail.com", "Ryon Walker Jnr"),
+                From = new MailAddress("myonwalkerjnr2001@gmail.com", "Ryon Walker Jnr"),
                 Subject = subject,
                 Body = "Please see attached."
             };
+
 
             // Add multiple email addresses
             foreach (var email in emails)
@@ -62,7 +43,7 @@ namespace AssignmentScheduler.Services
                         if (attachment != null && attachment.Length > 0)
                         {
                             var memoryStream = new MemoryStream(attachment);
-                            var mailAttachment = new Attachment(memoryStream, "Papiin Asainment Skedyuul.xlsx");
+                            var mailAttachment = new Attachment(memoryStream, $"Papiin Asainment Skedyuul ({month}).xlsx");
                             message.Attachments.Add(mailAttachment);
 
                         }
