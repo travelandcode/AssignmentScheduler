@@ -9,5 +9,7 @@ namespace AssignmentScheduler.Interfaces
     public interface IMonthRepository
     {
         Task<string> GetNextMonth();
+
+        Task<string> GetCurrentMonth();
     }
 }

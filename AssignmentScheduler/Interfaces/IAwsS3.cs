@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace AssignmentScheduler.Interfaces
 {
-    public interface IEmailService
+    public interface IAwsS3
     {
-        Task SendEmail(string[] emails, string subject, List<byte[]> attachments, string month);
+        Task UploadFileAsync(byte[] fileBytes, string fileName, string contentType);
+
+        Task<String> GetFile(string month);
     }
 }

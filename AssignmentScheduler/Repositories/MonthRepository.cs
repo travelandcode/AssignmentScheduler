@@ -24,6 +24,16 @@ namespace AssignmentScheduler.Repositories
             return monthInPatwa;
         }
 
+        public async Task<string>  GetCurrentMonth()
+        {
+            DateTime currentDate = DateTime.Now;
+            DateTime nextMonth = currentDate.AddMonths(0);
+            String month = nextMonth.ToString("MMMM");
+            var monthFromDB = await _monthCollection.Find(m => m.english == month).ToListAsync();
+            var monthInPatwa = monthFromDB.Select(m => m.patwa).FirstOrDefault();
+            return monthInPatwa;
+        }
+
 
     }
 }
